@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdi Shot - Pass & Play</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --neon-green: #39FF14;
+            --neon-purple: #9d4edd;
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background-color: #151515;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--neon-purple);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.5);
+        }
+
+        /* Form Elemanları */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .rule-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .rule-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Butonlar */
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--neon-green);
+            color: black;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--neon-purple);
+            color: white;
+        }
+
+        .btn-danger { background-color: #e63946; color: white; }
+
+        /* Oyun Alanı Tasarımı */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .game-table {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .deck-area {
+            display: flex;
+            gap: 20px;
+        }
+
+        .web-card {
+            width: 90px;
+            height: 130px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .web-card.back {
+            background: linear-gradient(135deg, #4a148c, #1a0033);
+            border: 2px solid var(--neon-purple);
+            color: white;
+            cursor: pointer;
+        }
+
+        .web-card.front {
+            background: white;
+            color: black;
+            border: 2px solid #ccc;
+        }
+
+        .red { color: #e63946; }
+        .black { color: #111; }
+
+        .party-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .party-buttons button { flex: 1; }
+
+        .player-hand-container {
+            background-color: #0f0f0f;
+            padding: 15px 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            width: 100%;
+            border-top: 1px solid #222;
+        }
+
+        .player-hand-container .web-card {
+            display: inline-flex;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        /* Kör Nokta Screen */
+        #blind-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-color: #0a0a0a;
+        }
+
+        #blind-screen h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: var(--neon-purple);
+        }
+
+        .alert-text {
+            color: #ffb703;
+            font-size: 18px;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 1. EKRAN: LOBİ VE AYARLAR -->
+    <div id="lobby-screen" class="screen active">
+        <h2>ABDI SHOT LOBİSİ</h2>
+        <div class="form-group">
+            <label>Oyuncular</label>
+            <div id="player-inputs">
+                <input type="text" value="Ahmet" class="player-name-input" style="margin-bottom:8px;">
+                <input type="text" value="Mehmet" class="player-name-input" style="margin-bottom:8px;">
+            </div>
+            <button class="btn-secondary" onclick="game.addPlayerInput()" style="margin-top:5px; font-size:13px;">+ Oyuncu Ekle</button>
+        </div>
+
+        <div class="form-group" style="margin-top:20px;">
+            <label>Parti Kuralları</label>
+            <div class="rule-row">
+                <span>7'li Cezası</span>
+                <div class="rule-control">
+                    <button onclick="game.updateRule('seven', -1)">-</button>
+                    <span id="rule-seven">2</span> Shot
+                    <button onclick="game.updateRule('seven', 1)">+</button>
+                </div>
+            </div>
+            <div class="rule-row">
+                <span>Pas Cezası</span>
+                <div class="rule-control">
+                    <button onclick="game.updateRule('pass', -1)">-</button>
+                    <span id="rule-pass">1</span> Shot
+                    <button onclick="game.updateRule('pass', 1)">+</button>
+                </div>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="game.start()" style="margin-top:auto;">🚀 PARTİYİ BAŞLAT</button>
+    </div>
+
+    <!-- 2. EKRAN: KÖR NOKTA (GEÇİŞ EKRANI) -->
+    <div id="blind-screen" class="screen">
+        <h1>SIRA DEĞİŞTİ!</h1>
+        <p style="font-size:14px; color:#666;">Telefonu sıradaki oyuncuya uzatın.</p>
+        <h2 id="next-player-title" style="margin: 20px 0; color:white;">SIRADAKİ: -</h2>
+        <div id="blind-alert" class="alert-text">Geçen elden ceza gelmedi.</div>
+        <button class="btn-primary" onclick="game.closeBlindScreen()">🥃 SHOT'I İÇTİM / AÇ</button>
+    </div>
+
+    <!-- 3. EKRAN: ANA OYUN MASASI -->
+    <div id="game-screen" class="screen">
+        <div class="status-bar">
+            <span id="current-player-name" style="font-weight:bold;">-</span>
+            <span id="current-player-shots" style="color:#e63946;">Shot: 0</span>
+        </div>
+
+        <div class="game-table">
+            <div class="deck-area">
+                <!-- DESTE -->
+                <div class="web-card back" onclick="game.drawCard()">DESTE</div>
+                <!-- ORTAKART -->
+                <div id="discard-pile" class="web-card front">Kupa<br>7</div>
+            </div>
+            <div style="font-size:12px; color:#555;">Kalan Kart: <span id="deck-count">0</span></div>
+        </div>
+
+        <div class="party-buttons">
+            <button class="btn-secondary" style="background:#d4a373;" onclick="alert('Abdi dediniz!')">🚨 ABDİ!</button>
+            <button class="btn-danger" onclick="alert('Önceki oyuncu yakalandı!')">🫵 YAKALADIM!</button>
+        </div>
+
+        <div class="player-hand-container" id="player-hand">
+            <!-- Kartlar JS ile dolacak -->
+        </div>
+    </div>
+
+    <!-- 4. EKRAN: OYUN SONU -->
+    <div id="end-screen" class="screen">
+        <h2>OUN BİTTİ!</h2>
+        <h3 id="winner-text" style="text-align:center; margin-bottom:20px; color:var(--neon-green);">Kazanan: -</h3>
+        <div id="score-board" style="background:var(--card-bg); padding:15px; border-radius:8px; margin-bottom:20px;">
+            <!-- Skorlar buraya -->
+        </div>
+        <button class="btn-primary" onclick="location.reload()">🔄 YENİDEN OYNA</button>
+    </div>
+
+</div>
+
+<script>
+// =============================================================================
+// OYUN MOTORU (JAVASCRIPT)
+// =============================================================================
+class AbdiWebEngine {
+    constructor() {
+        this.players = [];
+        this.deck = [];
+        this.discardPile = [];
+        this.activePlayerIndex = 0;
+        this.rules = { seven: 2, pass: 1 };
+        this.alertMessage = "Oyun Başlıyor!";
+    }
+
+    addPlayerInput() {
+        const container = document.getElementById('player-inputs');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'player-name-input';
+        input.placeholder = `${container.children.length + 1}. Oyuncu İsmi`;
+        input.style.marginBottom = '8px';
+        container.appendChild(input);
+    }
+
+    updateRule(rule, val) {
+        this.rules[rule] = Math.max(1, this.rules[rule] + val);
+        document.getElementById(`rule-${rule}`).innerText = this.rules[rule];
+    }
+
+    switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    start() {
+        const inputs = document.querySelectorAll('.player-name-input');
+        this.players = Array.from(inputs).map(i => i.value.trim()).filter(v => v !== "").map(name => ({
+            name: name,
+            hand: [],
+            shots: 0
+        }));
+
+        if (this.players.length < 2) {
+            alert("En az 2 oyuncu olmalı!");
+            return;
+        }
+
+        this.buildDeck();
+        this.dealCards();
+        
+        // İlk kartı ortaya aç
+        this.discardPile.push(this.deck.pop());
+        this.activePlayerIndex = 0;
+        this.openBlindScreen("Oyun Başladı! Telefonu ilk oyuncuya teslim edin.");
+    }
+
+    buildDeck() {
+        const suits = ['kupa', 'maca', 'karo', 'sinek'];
+        const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        this.deck = [];
+
+        for (let suit of suits) {
+            for (let val of values) {
+                this.deck.push({ suit, val });
+            }
+        }
+        // Shuffle (Karıştır)
+        this.deck.sort(() => Math.random() - 0.5);
+    }
+
+    dealCards() {
+        for (let p of this.players) {
+            for (let i = 0; i < 7; i++) {
+                p.hand.push(this.deck.pop());
+            }
+        }
+    }
+
+    openBlindScreen(msg) {
+        document.getElementById('next-player-title').innerText = `SIRADAKİ: ${this.players[this.activePlayerIndex].name.toUpperCase()}`;
+        document.getElementById('blind-alert').innerText = msg;
+        this.switchScreen('blind-screen');
+    }
+
+    closeBlindScreen() {
+        this.renderGameBoard();
+        this.switchScreen('game-screen');
+    }
+
+    renderGameBoard() {
+        const currentPlayer = this.players[this.activePlayerIndex];
+        const topCard = this.discardPile[this.discardPile.length - 1];
+
+        document.getElementById('current-player-name').innerText = `Sıra: ${currentPlayer.name}`;
+        document.getElementById('current-player-shots').innerText = `Toplam Shot: ${currentPlayer.shots}`;
+        document.getElementById('deck-count').innerText = this.deck.length;
+
+        // Ortadaki Kartı Render Et
+        const isRed = topCard.suit === 'kupa' || topCard.suit === 'karo';
+        const discardDiv = document.getElementById('discard-pile');
+        discardDiv.className = `web-card front ${isRed ? 'red' : 'black'}`;
+        discardDiv.innerHTML = `${topCard.suit.toUpperCase()}<br>${topCard.val}`;
+
+        // Oyuncunun Elini Render Et
+        const handContainer = document.getElementById('player-hand');
+        handContainer.innerHTML = '';
+
+        currentPlayer.hand.forEach((card, index) => {
+            const cardIsRed = card.suit === 'kupa' || card.suit === 'karo';
+            const cardDiv = document.createElement('div');
+            cardDiv.className = `web-card front ${cardIsRed ? 'red' : 'black'}`;
+            cardDiv.innerHTML = `${card.suit.substring(0,4).toUpperCase()}<br>${card.val}`;
+            cardDiv.onclick = () => this.playCard(index);
+            handContainer.appendChild(cardDiv);
+        });
+    }
+
+    playCard(cardIndex) {
+        const currentPlayer = this.players[this.activePlayerIndex];
+        const selectedCard = currentPlayer.hand[cardIndex];
+        const topCard = this.discardPile[this.discardPile.length - 1];
+
+        // Kural Uyumluluk Kontrolü
+        if (selectedCard.suit === topCard.suit || selectedCard.val === topCard.val) {
+            currentPlayer.hand.splice(cardIndex, 1);
+            this.discardPile.push(selectedCard);
+
+            // Kazanma Kontrolü
+            if (currentPlayer.hand.length === 0) {
+                this.endGame(currentPlayer.name);
+                return;
+            }
+
+            // Özel Kart Aksiyon Mesajları
+            let nextMsg = "Cezanız temiz, sıradaki karta odaklanın.";
+            if (selectedCard.val === '7') {
+                nextMsg = `⚠️ 7'Lİ ATTIN! Sonraki oyuncu ${this.rules.seven} SHOT içecek!`;
+                this.getNextPlayer().shots += this.rules.seven;
+            } else if (selectedCard.val === '8') {
+                nextMsg = `⚠️ 8'Lİ PAS! Sıranı kaybettin ve ${this.rules.pass} SHOT içiyorsun.`;
+                this.getNextPlayer().shots += this.rules.pass;
+                this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length; // Bir kişiyi atla
+            }
+
+            this.passTurn(nextMsg);
+        } else {
+            alert("Geçersiz Hamle! Kartın tipi veya değeri uyuşmalı.");
+        }
+    }
+
+    drawCard() {
+        if (this.deck.length === 0) {
+            alert("Deste bitti, yerdeki kartlar karıştırılıyor!");
+            const top = this.discardPile.pop();
+            this.deck = [...this.discardPile].sort(() => Math.random() - 0.5);
+            this.discardPile = [top];
+        }
+
+        const currentPlayer = this.players[this.activePlayerIndex];
+        const drawnCard = this.deck.pop();
+        const topCard = this.discardPile[this.discardPile.length - 1];
+
+        currentPlayer.hand.push(drawnCard);
+
+        if (drawnCard.suit === topCard.suit || drawnCard.val === topCard.val) {
+            alert(`Uyumlu kart çektin (${drawnCard.suit.toUpperCase()} ${drawnCard.val})! Yerden oynayabilirsin.`);
+            this.renderGameBoard();
+        } else {
+            currentPlayer.shots += this.rules.pass;
+            this.passTurn(`Uyumlu kart çekemedin! Pas geçiyorsun ve ${this.rules.pass} SHOT içiyorsun.`);
+        }
+    }
+
+    getNextPlayer() {
+        const nextIndex = (this.activePlayerIndex + 1) % this.players.length;
+        return this.players[nextIndex];
+    }
+
+    passTurn(msg) {
+        this.activePlayerIndex = (this.activePlayerIndex + 1) % this.players.length;
+        this.openBlindScreen(msg);
+    }
+
+    endGame(winnerName) {
+        document.getElementById('winner-text').innerText = `👑 Kazanan: ${winnerName}`;
+        const board = document.getElementById('score-board');
+        board.innerHTML = '<h4>📊 Gecenin Shot Raporu:</h4><br>';
+        
+        this.players.forEach(p => {
+            board.innerHTML += `<p style="margin-bottom:8px;"><strong>${p.name}</strong>: ${p.shots} Shot İçti</p>`;
+        });
+
+        this.switchScreen('end-screen');
+    }
+}
+
+// Oyunu Başlat
+const game = new AbdiWebEngine();
+</script>
+
+</body>
+</html>
