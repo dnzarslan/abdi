@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdi Shot - Gerçek Deste Modu</title>
+    <title>Abdi Shot - Eğlence Modu</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -63,6 +63,7 @@
             text-shadow: 0 0 10px rgba(157, 78, 221, 0.6);
         }
 
+        /* Lobi Tasarımı */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 14px; color: #888; }
         input[type="text"] {
@@ -96,6 +97,7 @@
 
         .btn-secondary { background-color: var(--card-bg); color: white; border: 1px solid #444; }
 
+        /* Oyun Masası */
         .game-header {
             display: flex;
             justify-content: space-between;
@@ -114,15 +116,15 @@
             perspective: 1200px;
         }
 
-        /* 🃏 GERÇEK İSKAMBİL BOYUTU ORANI */
+        /* 🚀 BÜYÜK MODER KART BOYUTLARI (240px x 360px) */
         .flip-card {
             width: 240px;
-            height: 350px;
+            height: 360px;
             cursor: pointer;
             transform-style: preserve-3d;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 15px 40px rgba(0,0,0,0.8);
-            border-radius: 14px;
+            border-radius: 18px;
         }
 
         .flip-card.flipped {
@@ -134,95 +136,59 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 14px;
-            padding: 12px;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            font-weight: bold;
         }
 
         /* KARTIN ARKASI */
         .card-back {
-            background: radial-gradient(circle, #2d004d 0%, #0d0014 100%);
-            border: 5px solid #fff;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
-            display: flex;
+            background: linear-gradient(135deg, #1f002a 0%, #0d0014 100%);
+            border: 4px solid var(--neon-purple);
+            color: white;
             justify-content: center;
             align-items: center;
+            box-shadow: inset 0 0 30px rgba(157, 78, 221, 0.5);
         }
 
         .card-back::after {
-            content: "♠️\n♥️\n♦️\n♣️";
-            white-space: pre;
-            font-size: 28px;
-            text-align: center;
-            line-height: 1.2;
-            opacity: 0.3;
+            content: "👑";
+            font-size: 55px;
+            opacity: 0.8;
+            text-shadow: 0 0 15px var(--neon-purple);
         }
 
-        /* KARTIN ÖNÜ (GELİŞMİŞ İSKAMBİL MATRİSİ) */
+        /* KARTIN ÖNÜ */
         .card-front {
-            background: #fdfdfd;
+            background: #ffffff;
             color: black;
             transform: rotateY(180deg);
-            border: 4px solid #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
+            border: 1px solid #ccc;
         }
 
-        /* Köşe İndeksleri */
-        .corners {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 26px;
-            font-weight: 900;
-            line-height: 0.95;
-            position: absolute;
-        }
-        .corners.top-left { top: 10px; left: 10px; }
-        .corners.bottom-right { bottom: 10px; right: 10px; transform: rotate(180deg); }
-
-        /* 🎯 ORTA AMBLEM MATRİSİ (Dinamik Dağılım İçin Grid Yapısı) */
-        .card-center-grid {
-            position: absolute;
-            top: 45px;
-            bottom: 45px;
-            left: 45px;
-            right: 45px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            align-items: center;
-            justify-items: center;
+        .card-front .corner-text {
             font-size: 32px;
-        }
-
-        /* 👑 RESİMLİ KARTLAR İÇİN PORTRE ALANI (J, Q, K) */
-        .card-picture-frame {
-            position: absolute;
-            top: 45px;
-            bottom: 45px;
-            left: 42px;
-            right: 42px;
-            border: 2px solid #ccc;
-            border-radius: 6px;
+            line-height: 0.9;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            font-size: 65px;
-            background: #f4f5f7;
-            overflow: hidden;
         }
-        
-        .card-picture-frame .inverted-figure {
+
+        .card-front .center-suit {
+            font-size: 110px;
+            align-self: center;
+            line-height: 1;
+        }
+
+        .card-front .bottom-corner {
             transform: rotate(180deg);
         }
 
-        .red { color: #d62828; }
-        .black { color: #141414; }
+        .red { color: #e63946; }
+        .black { color: #111; }
 
         /* Aktif Kurallar Kutusu */
         .active-rules-box {
@@ -239,33 +205,56 @@
         .active-rules-box h4 { font-size: 13px; color: var(--neon-pink); margin-bottom: 5px; }
         .rule-item { font-size: 13px; color: #ccc; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* POP-UP MODAL */
+        /* POP-UP / MODAL ALANI */
         .modal {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.95);
+            background-color: rgba(0,0,0,0.94);
             z-index: 100;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 25px 20px;
+            padding: 30px 20px;
             text-align: center;
             overflow-y: auto;
         }
 
         .modal.active { display: flex; }
 
-        /* Pop-up'taki Küçük Kart Klonu */
-        .preview-holder {
-            transform: scale(0.65);
-            margin-top: -50px;
-            margin-bottom: -40px;
-            pointer-events: none;
+        /* POP-UP İÇİNDEKİ MİNİMAL ÖNİZLEME */
+        .modal-card-preview {
+            width: 90px;
+            height: 135px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            margin-top: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8px;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
-        .rule-title { font-size: 24px; color: var(--neon-green); margin-bottom: 12px; font-weight: bold; }
-        .rule-desc { font-size: 15px; line-height: 1.5; color: white; margin-bottom: 20px; padding: 0 5px; }
+        .modal-card-preview .preview-corner {
+            font-size: 16px;
+            line-height: 0.9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .modal-card-preview .preview-center {
+            font-size: 40px;
+            align-self: center;
+            line-height: 1;
+        }
+
+        .rule-title { font-size: 24px; color: var(--neon-green); margin-bottom: 12px; font-weight: bold; text-shadow: 0 0 10px rgba(57,255,20,0.2); }
+        .rule-desc { font-size: 15px; line-height: 1.5; color: white; margin-bottom: 20px; padding: 0 10px; }
 
         .suggestion-box {
             background: #221230;
@@ -275,6 +264,7 @@
             margin-bottom: 20px;
             font-size: 14px;
             color: #dfc9f5;
+            display: none;
             width: 100%;
         }
     </style>
@@ -311,15 +301,26 @@
         <div class="deck-wrapper">
             <p style="font-size:13px; color:#555; text-align:center;">Kartı açmak için üzerine dokun</p>
             
-            <!-- ANA DÖNEN KART OLUŞUMU -->
             <div id="game-card" class="flip-card" onclick="game.drawCard()">
+                <!-- KARTIN ARKASI -->
                 <div class="card-face card-back"></div>
-                <div id="card-front-face" class="card-face card-front">
-                    <!-- Dinamik İçerik Enjekte Edilecek -->
+                
+                <!-- KARTIN ÖNÜ -->
+                <div id="card-front-face" class="card-face card-front black">
+                    <div class="corner-text top-corner">
+                        <div id="top-val">A</div>
+                        <div id="top-suit">♠️</div>
+                    </div>
+                    <div id="center-suit-large" class="center-suit">♠️</div>
+                    <div class="corner-text bottom-corner">
+                        <div id="bottom-val">A</div>
+                        <div id="bottom-suit">♠️</div>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Aktif Kurallar -->
         <div class="active-rules-box">
             <h4>⚠️ AKTİF OYUN KURALLARI</h4>
             <div id="active-rules-list">
@@ -331,19 +332,28 @@
     <!-- 3. EKRAN: KURAL POP-UP (MODAL) -->
     <div id="card-modal" class="modal">
         
-        <!-- Kartın Birebir Klonunun Önizlemesi Buraya Gelecek -->
-        <div class="preview-holder">
-            <div id="modal-card-preview" class="card-front" style="position:relative; width:240px; height:350px;"></div>
+        <!-- POP-UP ÜSTÜNDEKİ KÜÇÜK KART ÖNİZLEMESİ -->
+        <div id="modal-card-preview" class="modal-card-preview black">
+            <div class="preview-corner">
+                <span id="prev-top-val">A</span>
+                <span id="prev-top-suit">♠️</span>
+            </div>
+            <div id="prev-center-suit" class="preview-center">♠️</div>
+            <div class="preview-corner" style="transform: rotate(180deg);">
+                <span id="prev-bottom-val">A</span>
+                <span id="prev-bottom-suit">♠️</span>
+            </div>
         </div>
 
         <div id="modal-rule-title" class="rule-title">KURAL ADI</div>
         <div id="modal-rule-desc" class="rule-desc">Kural açıklaması.</div>
         
+        <!-- Kart 10 Öneri Alanı -->
         <div id="modal-suggestion" class="suggestion-box">
             <strong>💡 Kural Önerisi:</strong> <span id="suggestion-text">Sol el kuralı</span>
         </div>
 
-        <button class="btn-primary" onclick="game.closeModal()" style="width:100%; margin-top:auto;">KAPAT VE DEVAM ET</button>
+        <button class="btn-primary" onclick="game.closeModal()" style="width:100%; margin-top:auto;">KAPAT VE SIRAYI PASLA</button>
     </div>
 
     <!-- 4. EKRAN: OYUN BİTTİ -->
@@ -366,10 +376,10 @@ class AbdiShotEngine {
         this.ruleDefinitions = {
             'A': { title: "A -> Kelime Ekleme", desc: "Kelime ekleye ekleye cümle kurun. Kartı çeken bir kelime söyler, sırayla herkes önceki kelimeleri unutturmadan yeni kelime ekler. İlk şaşıran SHOT yapar!" },
             'K': { title: "K -> Pas", desc: "Arada sırada dinlenmek lazım. Kimse içmez, sıradaki kart çekilir." },
-            'Q': { title: "Q -> Soruna Cevap Veriyorum", desc: "Bu karttan sonra bir oyuncu diğerine soru sorduğunda, cevap veercek kişi 'Soruna cevap veriyorum' dedikten sonra cevaplamalıdır. Unutan SHOT yapar!" },
+            'Q': { title: "Q -> Soruna Cevap Veriyorum", desc: "Bu karttan sonra bir oyuncu diğerine soru sorduğunda, cevap verecek kişi 'Soruna cevap veriyorum' dedikten sonra cevaplamalıdır. Unutan SHOT yapar!" },
             'J': { title: "J -> Grup", desc: "Kartı çeken gruplanabilir bir şey söyler (Örn: Spor dalları -> Futbol). Sırayla herkes o gruptan yeni bir şey söyler. Söyleyemeyen veya tekrar eden SHOT yapar!" },
             '10': { title: "10 -> Kural Uydur", desc: "İstediğin bir kuralı uydur! Bu kuralı ilk bozan SHOT yapar ve kural kalkar. Bozulmadan bir 10 daha çekilirse kurallar birikir!" },
-            '9': { title: "9 -> Doğru / Yanlış", desc: "Bir iddia ortaya at (Örn: 'Ben Galatasaraylıyım'). Diğerleri doğru/yanlış tahmini yapar. Yanlış tahmin eden herkes SHOT yapar!" },
+            '9': { title: "9 -> Doğru / Yanlış", desc: "Bir iddia ortaya at (Örn: 'Ben Galatasaraylıyım'). Diğerleri doğru/yanlış tahmin yapar. Yanlış tahmin eden herkes SHOT yapar!" },
             '8': { title: "8 -> Parmak Masaya", desc: "Herkes hızlıca parmağını masaya koysun! En son koyan hantal oyuncu SHOT yapar!" },
             '7': { title: "7 -> Ben Hiç...", desc: "'Ben hiç ... yapmadım' de. Masada bunu daha önce yapmış olanlar SHOT yapar!" },
             '6': { title: "6 -> Kızlar", desc: "Masada bulunan tüm kızlar şerefe diyor ve SHOT yapıyor!" },
@@ -438,12 +448,7 @@ class AbdiShotEngine {
         const card = this.deck.pop();
         document.getElementById('deck-count').innerText = this.deck.length;
 
-        // Kart tasarım matrisini çalıştır
-        const cardHTML = this.generateCardHTML(card);
-        
-        // Hem masadaki karta hem de pop-up'taki klona enjekte et
-        document.getElementById('card-front-face').innerHTML = cardHTML;
-        document.getElementById('modal-card-preview').innerHTML = cardHTML;
+        this.updateCardFaces(card);
 
         const cardElement = document.getElementById('game-card');
         cardElement.classList.add('flipped');
@@ -453,64 +458,29 @@ class AbdiShotEngine {
         }, 700);
     }
 
-    // 🎯 GERÇEK İSKAMBİL DAĞILIM MOTORU
-    generateCardHTML(card) {
+    updateCardFaces(card) {
+        const frontFace = document.getElementById('card-front-face');
+        const previewFace = document.getElementById('modal-card-preview');
         const isRed = card.suit === 'kupa' || card.suit === 'karo';
         const colorClass = isRed ? 'red' : 'black';
+        
         let symbol = card.suit === 'kupa' ? '♥️' : card.suit === 'karo' ? '♦️' : card.suit === 'maca' ? '♠️' : '♣️';
-        
-        // Köşe Yapıları
-        let html = `
-            <div class="corners top-left ${colorClass}"><div>${card.val}</div><div style="font-size:18px">${symbol}</div></div>
-            <div class="corners bottom-right ${colorClass}"><div>${card.val}</div><div style="font-size:18px">${symbol}</div></div>
-        `;
 
-        // 👑 RESİMLİ FİGÜRLER (K, Q, J) TASARIMI
-        if (['J', 'Q', 'K'].includes(card.val)) {
-            let figure = card.val === 'J' ? '⚔️🤵' : card.val === 'Q' ? '👑👸' : '👑👑';
-            let borderStyle = isRed ? 'border-color:#d62828' : 'border-color:#141414';
-            html += `
-                <div class="card-picture-frame" style="${borderStyle}">
-                    <div class="figure">${figure}</div>
-                    <div class="figure inverted-figure">${figure}</div>
-                </div>
-            `;
-            return html;
-        }
+        // Masadaki Büyük Kartı Güncelle
+        frontFace.className = `card-face card-front ${colorClass}`;
+        document.getElementById('top-val').innerText = card.val;
+        document.getElementById('top-suit').innerText = symbol;
+        document.getElementById('center-suit-large').innerText = symbol;
+        document.getElementById('bottom-val').innerText = card.val;
+        document.getElementById('bottom-suit').innerText = symbol;
 
-        // 🔟 SAYISAL AMBLEM ADET DAĞILIMI (GRID SİSTEMİ)
-        let num = card.val === 'A' ? 1 : parseInt(card.val);
-        html += `<div class="card-center-grid ${colorClass}">`;
-
-        // Farklı rakamların simetrik dizilim şablonları (12'li Grid Hücresi Üzerinden)
-        let layouts = {
-            1: [5],
-            2: [2, 11],
-            3: [2, 5, 11],
-            4: [1, 3, 10, 12],
-            5: [1, 3, 5, 10, 12],
-            6: [1, 3, 4, 6, 10, 12],
-            7: [1, 3, 4, 6, 5, 10, 12],
-            8: [1, 3, 4, 6, 7, 9, 10, 12],
-            9: [1, 3, 4, 6, 5, 7, 9, 10, 12],
-            10: [1, 3, 4, 6, 2, 11, 7, 9, 10, 12]
-        };
-
-        let activeCells = layouts[num] || [];
-        
-        // 1'den 12'ye kadar olan hücreleri doldur
-        for (let i = 1; i <= 12; i++) {
-            if (activeCells.includes(i)) {
-                // Alt kısımdaki emojiler ters dursun (Gerçek iskambil detayı)
-                let style = i > 6 ? 'transform: rotate(180deg);' : '';
-                html += `<div style="${style}">${symbol}</div>`;
-            } else {
-                html += `<div></div>`;
-            }
-        }
-
-        html += `</div>`;
-        return html;
+        // Pop-up İçindeki Küçük Önizleme Kartını Güncelle
+        previewFace.className = `modal-card-preview ${colorClass}`;
+        document.getElementById('prev-top-val').innerText = card.val;
+        document.getElementById('prev-top-suit').innerText = symbol;
+        document.getElementById('prev-center-suit').innerText = symbol;
+        document.getElementById('prev-bottom-val').innerText = card.val;
+        document.getElementById('prev-bottom-suit').innerText = symbol;
     }
 
     openRuleModal(card) {
@@ -543,6 +513,7 @@ class AbdiShotEngine {
 
     closeModal() {
         document.getElementById('card-modal').classList.remove('active');
+        
         const cardElement = document.getElementById('game-card');
         cardElement.classList.remove('flipped');
         
