@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdi Shot - Eğlence Modu</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --neon-green: #39FF14;
+            --neon-purple: #9d4edd;
+            --text-color: #c5c6c7;
+            --neon-pink: #ff007f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background-color: #111;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+            border: 1px solid #222;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--neon-purple);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.6);
+        }
+
+        /* Lobi Tasarımı */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #888; }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--neon-green);
+            color: black;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+        }
+
+        .btn-secondary { background-color: var(--card-bg); color: white; border: 1px solid #444; }
+        .btn-danger { background-color: #e63946; color: white; }
+
+        /* Oyun Masası */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .deck-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .main-deck {
+            width: 150px;
+            height: 220px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #2c003e, #03001e);
+            border: 3px dashed var(--neon-purple);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.3);
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .main-deck:active { transform: scale(0.95); }
+
+        /* Aktif Kurallar Kutusu */
+        .active-rules-box {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: auto;
+            margin-bottom: 10px;
+        }
+
+        .active-rules-box h4 { font-size: 13px; color: var(--neon-pink); margin-bottom: 5px; }
+        .rule-item { font-size: 13px; color: #ccc; margin-bottom: 4px; display: flex; justify-content: space-between; }
+
+        /* Pop-Up / Modal (Kart Çekildiğinde Açılan Alan) */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-card {
+            width: 120px;
+            height: 180px;
+            background: white;
+            border-radius: 12px;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0 0 25px rgba(255,255,255,0.2);
+            margin-bottom: 25px;
+        }
+
+        .modal-card.red { color: #e63946; }
+        .modal-card.black { color: #111; }
+
+        .rule-title { font-size: 26px; color: var(--neon-green); margin-bottom: 15px; font-weight: bold; }
+        .rule-desc { font-size: 16px; line-height: 1.5; color: white; margin-bottom: 30px; padding: 0 10px; }
+
+        /* Öneri Kural Kutusu (KART 10 İçin) */
+        .suggestion-box {
+            background: #221230;
+            border: 1px solid var(--neon-purple);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #dfc9f5;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 1. EKRAN: LOBİ -->
+    <div id="lobby-screen" class="screen active">
+        <h2>ABDI SHOT</h2>
+        <p style="text-align:center; font-size:13px; color:#666; margin-bottom:20px;">Deste kapalı. Sırayla çekin, kurallara uymayan shot yapar!</p>
+        
+        <div class="form-group">
+            <label>Oyuncu Listesi (Sıra önemli değil)</label>
+            <div id="player-inputs">
+                <input type="text" value="Ahmet" class="player-name-input" style="margin-bottom:8px;">
+                <input type="text" value="Mehmet" class="player-name-input" style="margin-bottom:8px;">
+                <input type="text" value="Can" class="player-name-input" style="margin-bottom:8px;">
+            </div>
+            <button class="btn-secondary" onclick="game.addPlayerInput()" style="font-size:13px; padding:6px 12px;">+ Oyuncu Ekle</button>
+        </div>
+
+        <button class="btn-primary" onclick="game.start()" style="margin-top:auto;">🚀 KARTLARI YERE SER</button>
+    </div>
+
+    <!-- 2. EKRAN: OYUN MASASI -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <span style="font-size:14px; color:#888;">🃏 Kapalı Harman Deste</span>
+            <span style="font-size:14px; color:var(--neon-green);">Kalan Kart: <span id="deck-count">52</span></span>
+        </div>
+
+        <div class="deck-wrapper">
+            <p style="font-size:14px; color:#666; text-align:center;">Karışık desteden bir kart seçmek için dokun</p>
+            <div class="main-deck" onclick="game.drawCard()">🔥<br>KART ÇEK</div>
+        </div>
+
+        <!-- Aktif Kurallar (10 ve Q Kartları Takibi) -->
+        <div class="active-rules-box">
+            <h4>⚠️ AKTİF OYUN KURALLARI</h4>
+            <div id="active-rules-list">
+                <div style="font-size:12px; color:#555;">Henüz aktif bir kural yok.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. EKRAN: KART VE KURAL POP-UP (MODAL) -->
+    <div id="card-modal" class="modal">
+        <div id="modal-card-display" class="modal-card">A</div>
+        <div id="modal-rule-title" class="rule-title">KURAL ADI</div>
+        <div id="modal-rule-desc" class="rule-desc">Kural açıklaması buraya gelecek.</div>
+        
+        <!-- Kart 10 Çekildiğinde Öneri Gösteren Alan -->
+        <div id="modal-suggestion" class="suggestion-box">
+            <strong>💡 Kural Önerisi:</strong> <span id="suggestion-text">Sol el kuralı</span>
+        </div>
+
+        <button class="btn-primary" onclick="game.closeModal()">KAPAT VE DEVAM ET</button>
+    </div>
+
+    <!-- 4. EKRAN: OYUN BİTTİ -->
+    <div id="end-screen" class="screen" style="justify-content:center; align-items:center; text-align:center;">
+        <h2>Deste Bitti!</h2>
+        <p style="margin-bottom:30px; line-height:1.6;">Yerdeki tüm kartlar çekildi. Kafalar güzelleştiyse partiyi yeniden başlatabilirsiniz!</p>
+        <button class="btn-primary" onclick="location.reload()">🔄 KARTLARI YENİDEN DAĞIT</button>
+    </div>
+
+</div>
+
+<script>
+// =============================================================================
+// OYUN MOTORU (JAVASCRIPT)
+// =============================================================================
+class AbdiShotEngine {
+    constructor() {
+        this.deck = [];
+        this.activeRules = [];
+        this.questionRuleActive = false; // Q kartı takibi
+        
+        // Kart Kuralları Tanımlamaları
+        this.ruleDefinitions = {
+            'A': { title: "A -> Kelime Ekleme", desc: "Kelime ekleye ekleye cümle kurun. Kartı çeken bir kelime söyler, sırayla herkes önceki kelimeleri sırasıyla unutturmadan yeni kelime ekler. İlk şaşıran SHOT yapar!" },
+            'K': { title: "K -> Pas", desc: "Arada sırada dinlenmek lazım. Kimse içmez, sıradaki kart çekilir." },
+            'Q': { title: "Q -> Soruna Cevap Veriyorum", desc: "Bu karttan sonra bir oyuncu diğerine soru sorduğunda, cevap verecek kişi 'Soruna cevap veriyorum' dedikten sonra cevaplamalıdır. Unutan SHOT yapar!" },
+            'J': { title: "J -> Grup", desc: "Kartı çeken gruplanabilir bir şey söyler (Örn: Spor dalları -> Futbol). Sırayla herkes o gruptan yeni bir şey söyler. Söyleyemeyen veya tekrar eden SHOT yapar!" },
+            '10': { title: "10 -> Kural Uydur", desc: "İstediğin bir kuralı uydur! Bu kuralı ilk bozan SHOT yapar ve kural kalkar. Bozulmadan bir 10 daha çekilirse kurallar birikir!" },
+            '9': { title: "9 -> Doğru / Yanlış", desc: "Bir iddia ortaya at (Örn: 'Ben Galatasaraylıyım'). Diğerleri doğru/yanlış tahmini yapar. Yanlış tahmin eden herkes SHOT yapar!" },
+            '8': { title: "8 -> Parmak Masaya", desc: "Herkes hızlıca parmağını masaya koysun! En son koyan hantal oyuncu SHOT yapar!" },
+            '7': { title: "7 -> Ben Hiç...", desc: "'Ben hiç ... yapmadım' de. Masada bunu daha önce yapmış olan günahkarlar SHOT yapar!" },
+            '6': { title: "6 -> Kızlar", desc: "Masada bulunan tüm kızlar şerefe diyor ve SHOT yapıyor!" },
+            '5': { title: "5 -> Erkekler", desc: "Masada bulunan tüm erkekler bardağı dikiyor ve SHOT yapıyor!" },
+            '4': { title: "4 -> Herkes", desc: "Ayrım yok! Masadaki herkes tek yürek oluyor ve SHOT yapıyor!" },
+            '3': { title: "3 -> İstediğine İçir", desc: "Gözüne birini kestir ve ona 1 SHOT hediye et!" },
+            '2': { title: "2 -> Kendin İç", desc: "Şansına küs, bu shot sana yazar. Kendin içiyorsun!" }
+        };
+
+        // Kart 10 Önerileri
+        this.ruleSuggestions = [
+            "T-Rex Kuralı: Dirsekler gövdeye yapışık oynanacak, dinozor gibi davranmayan içer.",
+            "Solak Dünya: Herkes bardağı tutmak ve karta dokunmak için sol elini kullanacak.",
+            "Göz Teması Yasak: Kimse içerken veya konuşurken bir başkasının gözüne bakamaz.",
+            "İsim Yasak: Kimse birbirine ismiyle hitap edemez (Birader, kanka serbest).",
+            "Fısıltı Odası: Herkes sadece fısıldayarak konuşabilir, sesini yükselten içer.",
+            "WC Vergisi: Tuvalete gitmek isteyen masadaki herkesten onay almalı, reddeden olursa gitmeden önce 1 shot içmeli.",
+            "Masaya Dokunma Yasak: Eller asla masaya konmayacak, sürekli dizlerin üstünde duracak.",
+            "Soruya Soru: Biriyle konuşurken sadece soru cümlesi kurabilirsin, düz cevap veren içer."
+        ];
+    }
+
+    addPlayerInput() {
+        const container = document.getElementById('player-inputs');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'player-name-input';
+        input.placeholder = `${container.children.length + 1}. Oyuncu İsmi`;
+        input.style.marginBottom = '8px';
+        container.appendChild(input);
+    }
+
+    start() {
+        this.buildAndShuffleDeck();
+        this.activeRules = [];
+        this.questionRuleActive = false;
+        this.updateRulesList();
+        
+        document.getElementById('deck-count').innerText = this.deck.length;
+        document.getElementById('lobby-screen').classList.remove('active');
+        document.getElementById('game-screen').classList.add('active');
+    }
+
+    buildAndShuffleDeck() {
+        const suits = ['kupa', 'maca', 'karo', 'sinek'];
+        const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        this.deck = [];
+
+        for (let suit of suits) {
+            for (let val of values) {
+                this.deck.push({ suit, val });
+            }
+        }
+        // Harmanlama / Karıştırma algoritması
+        this.deck.sort(() => Math.random() - 0.5);
+    }
+
+    drawCard() {
+        if (this.deck.length === 0) {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('end-screen').classList.add('active');
+            return;
+        }
+
+        const card = this.deck.pop();
+        document.getElementById('deck-count').innerText = this.deck.length;
+
+        this.openCardModal(card);
+    }
+
+    openCardModal(card) {
+        const modal = document.getElementById('card-modal');
+        const cardDisplay = document.getElementById('modal-card-display');
+        const titleDisplay = document.getElementById('modal-rule-title');
+        const descDisplay = document.getElementById('modal-rule-desc');
+        const suggBox = document.getElementById('modal-suggestion');
+
+        // Kart Tipi Rengi
+        const isRed = card.suit === 'kupa' || card.suit === 'karo';
+        cardDisplay.className = `modal-card ${isRed ? 'red' : 'black'}`;
+        
+        // Kart Sembolü Belirleme
+        let suitSymbol = card.suit === 'kupa' ? '♥️' : card.suit === 'karo' ? '♦️' : card.suit === 'maca' ? '♠️' : '♣️';
+        cardDisplay.innerHTML = `${card.val}<br><span style="font-size:20px">${suitSymbol}</span>`;
+
+        // Kural Getirme
+        const rule = this.ruleDefinitions[card.val];
+        titleDisplay.innerText = rule.title;
+        descDisplay.innerText = rule.desc;
+
+        // Kart 10 ve Q İçin Özel Durum Takipleri
+        if (card.val === '10') {
+            suggBox.style.display = 'block';
+            const randomSugg = this.ruleSuggestions[Math.floor(Math.random() * this.ruleSuggestions.length)];
+            document.getElementById('suggestion-text').innerText = randomSugg;
+            
+            // Kuralı hafızaya ekle
+            this.activeRules.push("Uydurulan Yeni Kural (Bozan shot yapar)");
+        } else {
+            suggBox.style.display = 'none';
+        }
+
+        if (card.val === 'Q' && !this.questionRuleActive) {
+            this.questionRuleActive = true;
+            this.activeRules.push("Q Kuralı: Cevap vermeden önce 'Soruna cevap veriyorum' de!");
+        }
+
+        this.updateRulesList();
+        modal.classList.add('active');
+    }
+
+    closeModal() {
+        document.getElementById('card-modal').classList.remove('active');
+        if (this.deck.length === 0) {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('end-screen').classList.add('active');
+        }
+    }
+
+    updateRulesList() {
+        const listContainer = document.getElementById('active-rules-list');
+        listContainer.innerHTML = '';
+
+        if (this.activeRules.length === 0) {
+            listContainer.innerHTML = '<div style="font-size:12px; color:#555;">Henüz aktif bir kural yok.</div>';
+            return;
+        }
+
+        this.activeRules.forEach((rule, index) => {
+            const item = document.createElement('div');
+            item.className = 'rule-item';
+            item.innerHTML = `<span>📌 ${rule}</span> <button onclick="game.removeRule(${index})" style="padding:2px 6px; font-size:10px; background:#444; color:white; border-radius:4px;">Kuralı Kaldır</button>`;
+            listContainer.appendChild(item);
+        });
+    }
+
+    removeRule(index) {
+        // Eğer kaldırılan kural Q kuralı ise bayrağı indir
+        if (this.activeRules[index].includes("Q Kuralı")) {
+            this.questionRuleActive = false;
+        }
+        this.activeRules.splice(index, 1);
+        this.updateRulesList();
+    }
+}
+
+const game = new AbdiShotEngine();
+</script>
+
+</body>
+</html>
